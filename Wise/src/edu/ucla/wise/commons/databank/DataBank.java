@@ -3323,7 +3323,7 @@ public class DataBank implements DataBankInterface {
 		String tname = filename.substring(0, filename.indexOf("."));
 		Connection conn = null;
 		Statement stmt = null;
-
+		String key = this.studySpace.db.getEmailEncryptionKey();
 		try {
 
 			/* get database connection */
@@ -3354,7 +3354,7 @@ public class DataBank implements DataBankInterface {
 			}
 
 			outputStr = outputStr.substring(0, outputStr.length() - 1) + "\n";
-			sqlm = sqlm.substring(0, sqlm.length() - 1) + " from " + tname;
+			sqlm = "select id,firstname,lastname,salutation,CAST(AES_DECRYPT(email,'"+key+"')AS CHAR) as email,phone,irb_id,CAST(AES_DECRYPT(specialty,'"+key+"')AS CHAR) as specialty,CAST(AES_DECRYPT(query_date,'"+key+"')AS CHAR) as query_date,CAST(AES_DECRYPT(consult_done,'"+key+"')AS CHAR) as consult_done,CAST(AES_DECRYPT(ptname,'"+key+"')AS CHAR) as ptname,CAST(AES_DECRYPT(submit_date,'"+key+"')AS CHAR(20)) as submit_date,CAST(AES_DECRYPT(consult_name,'"+key+"')AS CHAR) as consult_name,CAST(AES_DECRYPT(consult_date,'"+key+"')AS CHAR) as consult_date from invitee;";
 			// log_error(sqlm);
 			stmt.execute(sqlm);
 			rs = stmt.getResultSet();
@@ -3365,12 +3365,8 @@ public class DataBank implements DataBankInterface {
 					if ((field_value == null) || field_value.equalsIgnoreCase("null")) {
 						field_value = "";
 					}
-					if (field_value.indexOf("\"") != -1) {
-						field_value = field_value.replaceAll("\"", "\"\"");
-						LOGGER.info(field_value);
-					}
-					// if(field_value.equalsIgnoreCase(""))
-					// delimitor[j] = "";
+
+					field_value = field_value.replaceAll("\"", "");
 					outputStr += delimitor[j] + field_value + delimitor[j] + ",";
 				}
 				outputStr = outputStr.substring(0, outputStr.length() - 1) + "\n";
@@ -3995,7 +3991,11 @@ public class DataBank implements DataBankInterface {
 							if (nonEncodedFieldSet.contains(colVal[j].toLowerCase())) {
 								nonEncodedFieldPositions.add(j);
 							}
-							sql += colVal[j] + ",";
+							if (colVal[j].equalsIgnoreCase("null")) {
+								sql += "''" + ",";
+							} else {
+								sql += colVal[j] + ",";
+							}
 						} else {
 							if (!nonEncodedFieldPositions.contains(j)) {
 								colVal[j] = "AES_ENCRYPT('" + colVal[j] + "','"

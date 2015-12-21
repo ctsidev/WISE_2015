@@ -431,7 +431,7 @@ public class StudySpace {
     }
 
     public String buildCsvString(String filename) {
-        return this.db.buildCsvString(filename);
+        return this.db.buildCsvStringOld(filename);
     }
 
     public String printInitialInviteeEditable(String surveyId) {

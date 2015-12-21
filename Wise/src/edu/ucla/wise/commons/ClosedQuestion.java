@@ -191,7 +191,8 @@ public class ClosedQuestion extends Question {
              * independently from Study_Space but no other reason to pass that
              * info down
              */
-            s += "<img src='imageRender?img=clear.gif' border=0></a>";
+            s += "<img src="+ WISEApplication.getInstance().getWiseProperties().getServerRootUrl()
+					+ "/WISE/survey/imageRender?img=clear.gif' border='0'></a>";
             s += "</td>";
         }
         s += "</tr>";
