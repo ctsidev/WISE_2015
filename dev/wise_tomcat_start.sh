@@ -1,6 +1,12 @@
 #! /bin/sh
-export JAVA_HOME=/opt/java/jdk1.8.0_45/
-export TOMCAT_HOME=/opt/tomcat/apache-tomcat-7.0.62/
-export WISE_HOME=/opt/wise/WISE_Environment/ppatil/WiseInstanceLinux/Properties/
-export WISE_SSW_HOME=/opt/wise/WISE_Environment/ppatil/WiseInstanceLinux/Properties/
+source /opt/wise/github/WISE_2015/dev/WISE.rc
+rm $TOMCAT_HOME/webapps/WISE.war
+rm $TOMCAT_HOME/webapps/WiseStudySpaceWizard.war
 $TOMCAT_HOME/bin/startup.sh
+echo "sleeping for tomcat startup"
+sleep 10
+cp /opt/wise/github/WISE_2015/WiseStudySpaceWizard/dist/WiseStudySpaceWizard.war $TOMCAT_HOME/webapps
+echo "sleeping for 20s while deploying WiseStudySpaceWizard"
+sleep 20
+cp /opt/wise/github/WISE_2015/Wise/dist/WISE.war $TOMCAT_HOME/webapps
+echo "WISE deployment complete"

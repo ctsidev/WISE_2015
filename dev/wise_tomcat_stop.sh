@@ -1,5 +1,4 @@
 #! /bin/sh
-export JAVA_HOME=/opt/java/jdk1.8.0_45/
-export TOMCAT_HOME=/opt/tomcat/apache-tomcat-7.0.62/
+source /opt/wise/github/WISE_2015/dev/WISE.rc
 $TOMCAT_HOME/bin/shutdown.sh
 
