@@ -11,4 +11,6 @@ cp /opt/github/WISE_2015/WiseStudySpaceWizard/dist/WiseStudySpaceWizard.war $TOM
 echo "sleeping for 20s while deploying WiseStudySpaceWizard"
 sleep 20
 cp /opt/github/WISE_2015/Wise/dist/WISE.war $TOMCAT_HOME/webapps
+sleep 10
+tail /var/log/tomcat8/catalina.out
 echo "WISE deployment complete"
