@@ -26,7 +26,7 @@ CREATE TABLE `invitee` (
   `irb_id` varchar(11) default NULL,
   `subj_type` char(1) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `survey_user_state`
@@ -42,7 +42,7 @@ CREATE TABLE `survey_user_state` (
   PRIMARY KEY  (`invitee`, `survey`),
   KEY `invitee` (`invitee`),
   CONSTRAINT `survey_user_state_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -59,7 +59,7 @@ CREATE TABLE `pending` (
   `completed_time` datetime default NULL,
   KEY `invitee` (`invitee`),
   CONSTRAINT `pending_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -78,7 +78,7 @@ CREATE TABLE `survey_message_use` (
   PRIMARY KEY  (`id`),
   KEY `invitee` (`invitee`),
   CONSTRAINT `survey_message_use_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `welcome_hits`
@@ -90,7 +90,7 @@ CREATE TABLE `welcome_hits` (
   `survey` varchar(64) NOT NULL default '',
   KEY `invitee` (`invitee`),
   CONSTRAINT `welcome_hits_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -105,7 +105,7 @@ CREATE TABLE `decline_hits` (
   `viewdate` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   KEY `msg_id` (`msg_id`),
   CONSTRAINT `decline_hits_ibfk_1` FOREIGN KEY (`msg_id`) REFERENCES `survey_message_use` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `decline_reason`
@@ -118,7 +118,7 @@ CREATE TABLE `decline_reason` (
   `declinedate` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   KEY `invitee` (`invitee`),
   CONSTRAINT `decline_reason_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `consent_response`
@@ -132,7 +132,7 @@ CREATE TABLE `consent_response` (
   `survey` varchar(64) NOT NULL default '',
   KEY `invitee` (`invitee`),
   CONSTRAINT `consent_response_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `survey_user_session`
@@ -148,7 +148,7 @@ CREATE TABLE `survey_user_session` (
   PRIMARY KEY  (`id`),
   KEY `from_message` (`from_message`),
   CONSTRAINT `survey_user_session_ibfk_1` FOREIGN KEY (`from_message`) REFERENCES `survey_message_use` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `page_view`
@@ -163,7 +163,7 @@ CREATE TABLE `page_view` (
   `hittime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   KEY `invitee` (`invitee`),
   CONSTRAINT `page_view_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `survey_user_page`
@@ -173,7 +173,7 @@ CREATE TABLE `survey_user_page` (
   `invitee` varchar(45) NOT NULL,
   `status` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`invitee`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -188,7 +188,7 @@ CREATE TABLE `page_submit` (
   `Created` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   KEY `invitee` (`invitee`),
   CONSTRAINT `page_submit_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `update_trail`
@@ -204,7 +204,7 @@ CREATE TABLE `update_trail` (
   `CurrentValue` varchar(255) default NULL,
   KEY `invitee` (`invitee`),
   CONSTRAINT `update_trail_ibfk_1` FOREIGN KEY (`invitee`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -222,7 +222,7 @@ CREATE TABLE `interviewer` (
   `submittime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `interview_assignment`
@@ -240,7 +240,7 @@ CREATE TABLE `interview_assignment` (
   PRIMARY KEY  (`id`),
   KEY `interviewer` (`interviewer`,`invitee`,`survey`),
   CONSTRAINT `interview_assignment_ibfk_1` FOREIGN KEY (`interviewer`) REFERENCES `interviewer` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `interview_session`
@@ -254,7 +254,7 @@ CREATE TABLE `interview_session` (
   KEY `assign_id` (`assign_id`),
   CONSTRAINT `interview_session_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `survey_user_session` (`id`) ON DELETE CASCADE,
   CONSTRAINT `interview_session_ibfk_2` FOREIGN KEY (`assign_id`) REFERENCES `interview_assignment` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -271,7 +271,7 @@ CREATE TABLE `surveys` (
   `archive_date` varchar(64) default NULL,
   `create_syntax` text,
   PRIMARY KEY  (`internal_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `survey_health`
@@ -281,7 +281,7 @@ CREATE TABLE `survey_health` (
 	`survey_name` varchar(32) NOT NULL, 
 	`last_update_time` bigint(64) NOT NULL, 
 	PRIMARY KEY (`survey_name`)
-)ENGINE=InnoDB DEFAULT CHARSET=latin1;
+)ENGINE=InnoDB;
 
 
 
@@ -295,7 +295,7 @@ CREATE TABLE `wisefiles` (
   `filecontents` longblob NOT NULL,
   `upload_date` datetime NOT NULL,
   PRIMARY KEY (`file_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `xmlfiles`
@@ -307,7 +307,7 @@ CREATE TABLE `xmlfiles` (
   `filecontents` longblob NOT NULL,
   `upload_date` datetime NOT NULL,
   PRIMARY KEY (`file_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -324,7 +324,7 @@ CREATE TABLE `data_integer` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   CONSTRAINT `data_integer_fk_1` FOREIGN KEY (`inviteeId`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `data_text`
@@ -340,7 +340,7 @@ CREATE TABLE `data_text` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   CONSTRAINT `data_text_fk_1` FOREIGN KEY (`inviteeId`) REFERENCES `invitee` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -355,7 +355,7 @@ CREATE TABLE `data_repeat_set_instance` (
   `survey` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 --
@@ -369,7 +369,7 @@ CREATE TABLE `data_rpt_ins_id_to_ques_id` (
   `type` char(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
