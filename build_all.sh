@@ -1,5 +1,9 @@
 #! /bin/sh
 export JAVA_HOME=/opt/java/jdk1.7.0_79/
+
+#fetch latest code
+git pull origin master
+
 cd WiseShared;
 ant dist;
 cd ..;
