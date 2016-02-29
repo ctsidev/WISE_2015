@@ -63,6 +63,7 @@ public class TriageServlet extends AbstractUserSessionServlet {
 
     @Override
     public String serviceMethod(User user, HttpSession session) {
+    	LOGGER.debug("Triage servlet for user id:"+user.getId());
         StringBuilder response = new StringBuilder();
 
         String interviewBegin = (String) session.getAttribute("INTERVIEW");
