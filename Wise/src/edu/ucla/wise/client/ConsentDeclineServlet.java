@@ -26,15 +26,12 @@
  */
 package edu.ucla.wise.client;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
@@ -45,58 +42,37 @@ import edu.ucla.wise.commons.WiseConstants;
  * 
  */
 @WebServlet("/survey/consent_decline")
-public class ConsentDeclineServlet extends HttpServlet {
+public class ConsentDeclineServlet extends AbstractUserSessionServlet{
     static final long serialVersionUID = 1000;
+    static Logger LOGGER = Logger.getLogger(ConsentDeclineServlet.class);
 
-    /**
-     * Saves the reason into the database for declining the survey by a user.
-     * 
-     * @param req
-     *            HTTP Request.
-     * @param res
-     *            HTTP Response.
-     * @throws ServletException
-     *             and IOException.
-     */
-    @Override
-    public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	@Override
+	public Logger getLogger() {
+		return LOGGER;
+	}
 
-        /* prepare for writing */
-        PrintWriter out;
-        res.setContentType("text/html");
-        out = res.getWriter();
-
-        HttpSession session = req.getSession(true);
-
-        // Surveyor_Application s = (Surveyor_Application) session
-        // .getAttribute("SurveyorInst");
-
-        /* if session is new, then show the session expired info */
-        if (session.isNew()) {
-            res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "error"
-                    + WiseConstants.HTML_EXTENSION);
-            return;
-        }
-
-        /* get the user from session */
+	@Override
+	public String serviceMethod(User user, HttpSession session, Map<String,String[]> reqParams) {
+		StringBuilder res = new StringBuilder();
+		/* get the user from session */
         User theUser = (User) session.getAttribute("USER");
         if (theUser == null) {
-            out.println("<p>Error: Can't find the user info.</p>");
-            return;
+            res.append("<p>Error: Can't find the user info.</p>");
+            return res.toString();
         }
 
         /* save the decline comments */
-        theUser.setDeclineReason(req.getParameter("reason"));
+        theUser.setDeclineReason(reqParams.get("reason")[0]);
 
         /* then show the thank you page to user */
         String newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "decline_thanks"
                 + WiseConstants.HTML_EXTENSION;
-        out.println("<html><head>");
-        out.println("<script LANGUAGE='JavaScript1.1'>");
-        out.println("top.location.replace('" + newPage + "');");
-        out.println("</script></head>");
-        out.println("<body></body>");
-        out.println("</html>");
-        out.close();
-    }
+        res.append("<html><head>");
+        res.append("<script LANGUAGE='JavaScript1.1'>");
+        res.append("top.location.replace('" + newPage + "');");
+        res.append("</script></head>");
+        res.append("<body></body>");
+        res.append("</html>");
+        return res.toString();
+	}
 }

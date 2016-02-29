@@ -44,7 +44,7 @@ import edu.ucla.wise.commons.WiseConstants;
  * 
  */
 public class BrowserRequestChecker {
-    static Logger log = Logger.getLogger(BrowserRequestChecker.class);
+    static Logger LOGGER = Logger.getLogger(BrowserRequestChecker.class);
 
     /**
      * Returns the user object that is linked with the current session if
@@ -68,6 +68,7 @@ public class BrowserRequestChecker {
          * session expired info
          */
         if (session.isNew()) {
+        	LOGGER.error("Could not fetch a stored session");
             res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "error"
                     + WiseConstants.HTML_EXTENSION);
             return null;

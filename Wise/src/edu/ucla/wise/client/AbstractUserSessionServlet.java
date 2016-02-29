@@ -28,6 +28,7 @@ package edu.ucla.wise.client;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -78,11 +79,12 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
             return;
         }
 
-        out.println(this.serviceMethod(theUser, session));
+        Map<String,String[]> requestParams = req.getParameterMap();
+        out.println(this.serviceMethod(theUser, session, requestParams));
     }
 
     public abstract Logger getLogger();
 
-    public abstract String serviceMethod(User user, HttpSession session);
+    public abstract String serviceMethod(User user, HttpSession session, Map<String,String[]> requestParams);
 
 }

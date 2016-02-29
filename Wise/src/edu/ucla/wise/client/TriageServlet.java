@@ -26,6 +26,8 @@
  */
 package edu.ucla.wise.client;
 
+import java.util.Map;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpSession;
 
@@ -62,7 +64,7 @@ public class TriageServlet extends AbstractUserSessionServlet {
     }
 
     @Override
-    public String serviceMethod(User user, HttpSession session) {
+    public String serviceMethod(User user, HttpSession session, Map<String,String[]> reqParams) {
     	LOGGER.debug("Triage servlet for user id:"+user.getId());
         StringBuilder response = new StringBuilder();
 
