@@ -57,7 +57,7 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
         HttpSession session = req.getSession(true);
 
         if (session.isNew()) {
-        	getLogger().error("Could not fetch a stored session");
+        	getLogger().error("Could not fetch a stored session for url "+req.getRequestURL());
             res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "error"
                     + WiseConstants.HTML_EXTENSION);
             return;
