@@ -142,7 +142,7 @@ public class BeginServlet extends HttpServlet {
         session.setAttribute(USER, theUser);
         LOGGER.info("The user has been identified: '" + theUser.getId() + "'");
 
-        String mainUrl = sharedFileUrl + "browser_check" + WiseConstants.HTML_EXTENSION + "?w=" + servletUrl + "start";
+        String mainUrl = sharedFileUrl + "browser_check" + WiseConstants.HTML_EXTENSION + "?w=" + servletUrl + "start"+"&t="+spaceIdEncode+"&msg="+msgId;
 
         res.sendRedirect(mainUrl);
     }

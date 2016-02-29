@@ -37,54 +37,54 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
 import edu.ucla.wise.commons.WiseConstants;
 
 public abstract class AbstractUserSessionServlet extends HttpServlet {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
-    @Override
-    public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        /* prepare for writing */
-        PrintWriter out;
-        res.setContentType("text/html");
-        out = res.getWriter();
+	@Override
+	public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		/* prepare for writing */
+		PrintWriter out;
+		res.setContentType("text/html");
+		out = res.getWriter();
 
-        HttpSession session = req.getSession(true);
+		HttpSession session = req.getSession(true);
 
-        if (session.isNew()) {
-        	getLogger().error("Could not fetch a stored session for url "+req.getRequestURL());
-            res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "error"
-                    + WiseConstants.HTML_EXTENSION);
-            return;
-        }
+		User theUser = null;
+		if (session.isNew()) {
+			getLogger().debug("Could not fetch a stored session for url "+req.getRequestURL());
+			theUser=WebUserUtils.getUserFromUrlParams(new WiseHttpRequestParameters(req));
+		}else{
+			theUser = (User) session.getAttribute("USER");	
+		}
 
-        User theUser = (User) session.getAttribute("USER");
+		/* if the user can't be created, send error info */
+		if (theUser == null) {
+			out.println("<HTML><HEAD><TITLE>Begin Page</TITLE>"
+					+ "<LINK href='"
+					+ SurveyorApplication.getInstance().getSharedFileUrl()
+					+ "style.css' type=text/css rel=stylesheet>"
+					+ "<body><center><table>"
+					// + "<body text=#000000 bgColor=#ffffcc><center><table>"
+					+ "<tr><td>Error: WISE can't seem to store your identity in the browser. You may have disabled cookies.</td></tr>"
+					+ "</table></center></body></html>");
+			this.getLogger().error("WISE BEGIN - Error: Can't get the user from session");
+			return;
+		}
 
-        /* if the user can't be created, send error info */
-        if (theUser == null) {
-            out.println("<HTML><HEAD><TITLE>Begin Page</TITLE>"
-                    + "<LINK href='"
-                    + SurveyorApplication.getInstance().getSharedFileUrl()
-                    + "style.css' type=text/css rel=stylesheet>"
-                    + "<body><center><table>"
-                    // + "<body text=#000000 bgColor=#ffffcc><center><table>"
-                    + "<tr><td>Error: WISE can't seem to store your identity in the browser. You may have disabled cookies.</td></tr>"
-                    + "</table></center></body></html>");
-            this.getLogger().error("WISE BEGIN - Error: Can't get the user from session");
-            return;
-        }
+		Map<String,String[]> requestParams = req.getParameterMap();
+		out.println(this.serviceMethod(theUser, session, requestParams));
+	}
 
-        Map<String,String[]> requestParams = req.getParameterMap();
-        out.println(this.serviceMethod(theUser, session, requestParams));
-    }
+	public abstract Logger getLogger();
 
-    public abstract Logger getLogger();
-
-    public abstract String serviceMethod(User user, HttpSession session, Map<String,String[]> requestParams);
+	public abstract String serviceMethod(User user, HttpSession session, Map<String,String[]> requestParams);
 
 }
