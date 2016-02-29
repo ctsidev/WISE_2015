@@ -88,6 +88,7 @@ public class SetupSurveyServlet extends HttpServlet {
          * session expired info
          */
         if (session.isNew()) {
+        	LOGGER.error("could not find a session");
             res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "error"
                     + WiseConstants.HTML_EXTENSION);
             return;
