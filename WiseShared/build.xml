@@ -25,7 +25,9 @@
         </fileset>
         <pathelement location="${bin.dir}" />
 	</path>
-	
+
+    <target name="dist" description="Build dist files" depends="jar" />
+
     <target name="prepare" depends="clean">
             <!-- Create build directories as needed -->
             <mkdir dir="${dist.dir}" />

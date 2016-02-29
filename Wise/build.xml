@@ -42,6 +42,8 @@
 		<path refid="compile.classpath" />
 		<pathelement location="${test.bin.dir}" />
 	</path>
+
+    <target name="dist" description="Build dist files" depends="war" />
 	
     <target name="prepare">
             <!-- Create build directories as needed -->
