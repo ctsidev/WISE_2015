@@ -136,14 +136,10 @@ public class TriageServlet extends AbstractUserSessionServlet {
                 }
             }
         } else if (user.startedSurvey()) {
-
-            /*
-             * for either user or interviewer, redirect to start the current
-             * page.
-             */
+        	LOGGER.info("User has started the survey in the past, proceeding to the page the user was on");
             mainUrl = SurveyorApplication.getInstance().getServletUrl() + "setup_survey";
         } else {
-
+        	LOGGER.info("Taking the user to the welcome screen");
             mainUrl = SurveyorApplication.getInstance().getServletUrl() + "welcome";
         }
 
