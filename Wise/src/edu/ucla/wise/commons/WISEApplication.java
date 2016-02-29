@@ -53,7 +53,9 @@ public class WISEApplication {
     public static void initialize(String contextPath, String rootFolderPath, WiseProperties properties)
             throws IOException {
         if (wiseApplication == null) {
+        	//setup study spaces should also be done here
             wiseApplication = new WISEApplication(contextPath, rootFolderPath, properties);
+            wiseApplication.setupStudySpaces();
         }
     }
 
@@ -68,7 +70,6 @@ public class WISEApplication {
     private final SurveyorApplication surveyorApplication;
 
     public WISEApplication(String contextPath, String rootFolderPath, WiseProperties properties) throws IOException {
-
         // first initialize the study space parameters provider
         this.wiseConfiguration = new ProductionConfiguration(properties);
         this.initializeStudySpaceParametersProvider(this.wiseConfiguration);
@@ -80,11 +81,13 @@ public class WISEApplication {
 
         this.adminApplication = AdminApplication.getInstance();
         this.surveyorApplication = SurveyorApplication.getInstance();
-
+    }
+    
+    public void setupStudySpaces(){
         /* set up Study_Space class -- pre-reads from sharedProps */
-        StudySpaceMap.setupStudies(properties);
+        StudySpaceMap.setupStudies(this.wiseProperties);
 
-        this.startEmailSendingThreads(properties, this.wiseConfiguration);
+        this.startEmailSendingThreads(this.wiseProperties, this.wiseConfiguration);
     }
 
     private void startEmailSendingThreads(WiseProperties properties, WiseConfiguration configuration) {
