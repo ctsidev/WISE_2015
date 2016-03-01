@@ -60,6 +60,7 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
 		if (session.isNew()) {
 			getLogger().debug("Could not fetch a stored session for url "+req.getRequestURL());
 			theUser=WebUserUtils.getUserFromUrlParams(new WiseHttpRequestParameters(req));
+			session.setAttribute("USER", theUser);
 		}else{
 			theUser = (User) session.getAttribute("USER");	
 		}
