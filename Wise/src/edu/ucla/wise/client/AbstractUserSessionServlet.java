@@ -28,6 +28,7 @@ package edu.ucla.wise.client;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
@@ -79,7 +80,7 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
 			return;
 		}
 
-		Map<String,String[]> requestParams = req.getParameterMap();
+		Map<String,String[]> requestParams = new HashMap<String,String[]>(req.getParameterMap());
 		requestParams.put("user-agent", new String[]{req.getHeader("user-agent")});
 		requestParams.put("X-FORWARDED-FOR", new String[]{req.getHeader("X-FORWARDED-FOR")});
 		requestParams.put("REMOTE-ADDRESS", new String[]{req.getRemoteAddr()});
