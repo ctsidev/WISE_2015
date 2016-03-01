@@ -81,8 +81,10 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
 		}
 
 		Map<String,String[]> requestParams = new HashMap<String,String[]>(req.getParameterMap());
-		requestParams.put("USER-AGENT", new String[]{req.getHeader("user-agent")});
-		requestParams.put("IP-ADDRESS", new String[]{req.getRemoteAddr()});
+		String userAgent = (req.getHeader("user-agent")==null)?req.getHeader("user-agent"):"NotAvailable";
+		String ipAddress = req.getRemoteAddr()==null?req.getRemoteAddr():"NotAvailable";
+		requestParams.put("USER-AGENT", new String[]{userAgent});
+		requestParams.put("IP-ADDRESS", new String[]{ipAddress});
 		out.println(this.serviceMethod(theUser, session, requestParams));
 	}
 
