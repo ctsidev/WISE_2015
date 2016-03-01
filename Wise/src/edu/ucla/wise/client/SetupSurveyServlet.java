@@ -27,16 +27,11 @@
 package edu.ucla.wise.client;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
@@ -45,7 +40,6 @@ import edu.ucla.wise.client.web.TemplateUtils;
 import edu.ucla.wise.commons.Interviewer;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
-import edu.ucla.wise.commons.WiseConstants;
 import freemarker.template.TemplateException;
 
 /**
@@ -54,7 +48,7 @@ import freemarker.template.TemplateException;
  */
 
 @WebServlet("/survey/setup_survey")
-public class SetupSurveyServlet extends HttpServlet {
+public class SetupSurveyServlet extends AbstractUserSessionServlet {
 
     private static final Logger LOGGER = Logger.getLogger(SetupSurveyServlet.class);
 
@@ -62,87 +56,6 @@ public class SetupSurveyServlet extends HttpServlet {
      * generated serial version id.
      */
     private static final long serialVersionUID = -3613883161236167151L;
-
-    /**
-     * Sets up the session for the user accessing the survey and also redirects
-     * the survey to correct page for returning users.
-     * 
-     * @param req
-     *            HTTP Request.
-     * @param res
-     *            HTTP Response.
-     * @throws ServletException
-     *             and IOException.
-     */
-    @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-
-        /* prepare for writing */
-        PrintWriter out;
-        res.setContentType("text/html");
-        out = res.getWriter();
-        HttpSession session = req.getSession(true);
-
-        /*
-         * if session is new, then it must have expired since begin; show the
-         * session expired info
-         */
-        if (session.isNew()) {
-        	LOGGER.error("could not find a session");
-            res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "error"
-                    + WiseConstants.HTML_EXTENSION);
-            return;
-        }
-
-        /* get the user from session */
-        User theUser = (User) session.getAttribute("USER");
-        if ((theUser == null) || (theUser.getId() == null)) {
-
-            /* latter signals an improperly-initialized User */
-            out.println("<p>Error: Can't find the user info.</p>");
-            return;
-        }
-
-        /* get the interviewer if it exists (set by interview_login) */
-        Interviewer inv = (Interviewer) session.getAttribute("INTERVIEWER");
-        if (theUser.completedSurvey()) {
-
-            /*
-             * triage should prevent this but in case it fails, bail out to
-             * "thanks" page
-             */
-            res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "thank_you");
-        }
-
-        /* Initialize survey session, passing the browser information */
-        String browserInfo = req.getHeader("user-agent");
-
-        /* Add Ip address for Audit logs. */
-        String ipAddress = req.getHeader("X-FORWARDED-FOR");
-        if (ipAddress == null) {
-            ipAddress = req.getRemoteAddr();
-        }
-        theUser.startSurveySession(browserInfo, ipAddress);
-
-        /* check if it is an interview process */
-        if (inv != null) {
-
-            /* start the interview session */
-            inv.beginSession(theUser.getSession());
-        }
-
-        /* display the current survey page */
-        if (theUser.getCurrentPage() != null) {
-            out.print(getHtml(theUser.getId(), this.getPageHTML(theUser), this.getProgressDivContent(theUser, session)));
-
-        } else {
-            out.println("<html>");
-            out.println("<head><script LANGUAGE='JavaScript1.1'>top.mainFrame.instruct.location.reload();</script></head>");
-            out.println("<body> Setup Survey Failure! </body>");
-            out.println("</html>");
-            out.close();
-        }
-    }
 
     public static String getHtml(String userId, String pageHtml, String progressDivHtml) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -240,4 +153,56 @@ public class SetupSurveyServlet extends HttpServlet {
         }
         return pageHtml.toString();
     }
+
+	@Override
+	public Logger getLogger() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	  /**
+     * Sets up the session for the user accessing the survey and also redirects
+     * the survey to correct page for returning users.
+     * 
+     */
+	@Override
+	public String serviceMethod(User theUser, HttpSession session, Map<String, String[]> requestParams) {
+		StringBuilder res = new StringBuilder();
+        /* get the interviewer if it exists (set by interview_login) */
+        Interviewer inv = (Interviewer) session.getAttribute("INTERVIEWER");
+
+        /* Initialize survey session, passing the browser information */
+        String browserInfo = requestParams.get("user-agent")[0];
+
+        /* Add Ip address for Audit logs. */
+        String ipAddress = requestParams.get("X-FORWARDED-FOR")[0];
+        if (ipAddress == null) {
+            ipAddress = requestParams.get("REMOTE-ADDRESS")[0];
+        }
+        theUser.startSurveySession(browserInfo, ipAddress);
+
+        /* check if it is an interview process */
+        if (inv != null) {
+
+            /* start the interview session */
+            inv.beginSession(theUser.getSession());
+        }
+
+        /* display the current survey page */
+        if (theUser.getCurrentPage() != null) {
+            try {
+				res.append(getHtml(theUser.getId(), this.getPageHTML(theUser), this.getProgressDivContent(theUser, session)));
+			} catch (IOException e) {
+				LOGGER.error(e);
+				res.append("Something went wrong while generating the survey. Please notify this to the admins.");
+			}
+
+        } else {
+        	res.append("<html>");
+        	res.append("<head><script LANGUAGE='JavaScript1.1'>top.mainFrame.instruct.location.reload();</script></head>");
+        	res.append("<body> Setup Survey Failure! </body>");
+        	res.append("</html>");
+        }
+        return res.toString();
+	}
 }

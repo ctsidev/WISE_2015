@@ -40,7 +40,6 @@ import org.apache.log4j.Logger;
 import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
-import edu.ucla.wise.commons.WiseConstants;
 
 public abstract class AbstractUserSessionServlet extends HttpServlet {
 	/**
@@ -80,6 +79,9 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
 		}
 
 		Map<String,String[]> requestParams = req.getParameterMap();
+		requestParams.put("user-agent", new String[]{req.getHeader("user-agent")});
+		requestParams.put("X-FORWARDED-FOR", new String[]{req.getHeader("X-FORWARDED-FOR")});
+		requestParams.put("REMOTE-ADDRESS", new String[]{req.getRemoteAddr()});
 		out.println(this.serviceMethod(theUser, session, requestParams));
 	}
 
