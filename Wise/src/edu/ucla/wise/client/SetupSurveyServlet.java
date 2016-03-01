@@ -172,13 +172,10 @@ public class SetupSurveyServlet extends AbstractUserSessionServlet {
         Interviewer inv = (Interviewer) session.getAttribute("INTERVIEWER");
 
         /* Initialize survey session, passing the browser information */
-        String browserInfo = requestParams.get("user-agent")[0];
+        String browserInfo = requestParams.get("USER-AGENT")[0];
 
         /* Add Ip address for Audit logs. */
-        String ipAddress = requestParams.get("X-FORWARDED-FOR")[0];
-        if (ipAddress == null) {
-            ipAddress = requestParams.get("REMOTE-ADDRESS")[0];
-        }
+        String ipAddress = requestParams.get("IP-ADDRESS")[0];
         theUser.startSurveySession(browserInfo, ipAddress);
 
         /* check if it is an interview process */
