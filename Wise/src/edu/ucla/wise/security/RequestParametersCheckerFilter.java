@@ -46,6 +46,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 
 import edu.ucla.wise.commons.SanityCheck;
+import edu.ucla.wise.commons.WISEApplication;
 
 /**
  * Filter to check request parameters send to admin and client. Checks all
@@ -96,14 +97,14 @@ public class RequestParametersCheckerFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         } catch (IOException e) {
-            LOGGER.error(e);
+            LOGGER.error("IO Exception",e);
         } catch (ServletException e) {
-            LOGGER.error(e);
+            LOGGER.error("Servlet Exception",e);
         } catch (RuntimeException e) {
-            LOGGER.error(e);
+            LOGGER.error("Runtime Exception", e);
         }
         try {
-            httpServletResponse.sendRedirect(httpServletRequest.getContextPath() + "/admin/error_pages/error.htm");
+            httpServletResponse.sendRedirect(WISEApplication.getInstance().getWiseProperties().getAdminServer() + "/admin/error_pages/error.htm");
         } catch (IOException e1) {
             LOGGER.error(e1);
         }
