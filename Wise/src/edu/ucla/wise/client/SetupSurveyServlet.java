@@ -156,8 +156,7 @@ public class SetupSurveyServlet extends AbstractUserSessionServlet {
 
 	@Override
 	public Logger getLogger() {
-		// TODO Auto-generated method stub
-		return null;
+		return LOGGER;
 	}
 
 	  /**
