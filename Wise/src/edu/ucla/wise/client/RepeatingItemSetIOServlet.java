@@ -26,19 +26,14 @@
  */
 package edu.ucla.wise.client;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import edu.ucla.wise.commons.SurveyorApplication;
+import org.apache.log4j.Logger;
+
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.User;
-import edu.ucla.wise.commons.WiseConstants;
 import edu.ucla.wise.commons.databank.UserDBConnection;
 
 /**
@@ -47,8 +42,9 @@ import edu.ucla.wise.commons.databank.UserDBConnection;
  * 
  */
 @WebServlet("/survey/repeating_item_io")
-public class RepeatingItemSetIOServlet extends HttpServlet {
+public class RepeatingItemSetIOServlet extends AbstractUserSessionServlet {
     static final long serialVersionUID = 1000;
+    private static final Logger LOGGER = Logger.getLogger(RepeatingItemSetIOServlet.class);
 
     /**
      * Gets all the data that is there in the repeating item table and prepares
@@ -62,41 +58,21 @@ public class RepeatingItemSetIOServlet extends HttpServlet {
      *             and IOException.
      */
     @Override
-    public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-
-        /* prepare for writing */
-        PrintWriter out;
-        res.setContentType("application/json");
-        out = res.getWriter();
-        HttpSession session = req.getSession(true);
-
-        /*
-         * if session is new, then it must have expired since begin; show the
-         * session expired info
-         */
-        if (session.isNew()) {
-            res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "error"
-                    + WiseConstants.HTML_EXTENSION);
-            return;
-        }
-
-        /* get the user from session */
-        User theUser = (User) session.getAttribute("USER");
-        if ((theUser == null) || (theUser.getId() == null)) {
-
-            /* latter signals an improperly-initialized User */
-            out.println("<p>Error: Can't find the user info.</p>");
-            return;
-        }
-
+    public String serviceMethod(User user, HttpSession session, WiseHttpRequestParameters requestParams) {
         /* get database connection */
-        UserDBConnection userDbConnection = theUser.getMyDataBank();
+        UserDBConnection userDbConnection = user.getMyDataBank();
 
         /* get the table name from request */
-        String repeatTableName = req.getParameter("repeat_table_name");
+        String repeatTableName = requestParams.getRepeatTableName();
 
         /* get the table values as a string */
         String repeatTableValues = userDbConnection.getAllDataForRepeatingSet(repeatTableName);
-        out.println(repeatTableValues);
+        return repeatTableValues;
     }
+
+	@Override
+	public Logger getLogger() {
+		return LOGGER;
+	}
+	
 }

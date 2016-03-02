@@ -26,23 +26,18 @@
  */
 package edu.ucla.wise.client;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Strings;
+
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.Interviewer;
-import edu.ucla.wise.commons.SanityCheck;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
 import edu.ucla.wise.commons.WISEApplication;
@@ -54,233 +49,206 @@ import edu.ucla.wise.commons.WiseConstants;
  * 
  */
 @WebServlet("/survey/readform")
-public class ReadFormServlet extends HttpServlet {
-    private static final Logger LOGGER = Logger.getLogger(ReadFormServlet.class);
-    static final long serialVersionUID = 1000;
+public class ReadFormServlet extends AbstractUserSessionServlet {
+	private static final Logger LOGGER = Logger.getLogger(ReadFormServlet.class);
+	static final long serialVersionUID = 1000;
 
-    /**
-     * Creates a Html page with the input address as the new page.
-     * 
-     * @param newPage
-     *            Url of the new page.
-     * @return String Html of the new page.
-     */
-    public String pageReplaceHtml(String newPage) {
-        return "<html>" + "<head><script LANGUAGE='javascript'>" + "top.location.replace('" + newPage + "');"
-                + "</script></head>" + "<body></body>" + "</html>";
-    }
+	/**
+	 * Creates a Html page with the input address as the new page.
+	 * 
+	 * @param newPage
+	 *            Url of the new page.
+	 * @return String Html of the new page.
+	 */
+	public String pageReplaceHtml(String newPage) {
+		return "<html>" + "<head><script LANGUAGE='javascript'>" + "top.location.replace('" + newPage + "');"
+				+ "</script></head>" + "<body></body>" + "</html>";
+	}
 
-    /**
-     * Updates the answers of users and redirect the survey to next page
-     * correctly.
-     * 
-     * @param req
-     *            HTTP Request.
-     * @param res
-     *            HTTP Response.
-     * @throws ServletException
-     *             and IOException.
-     */
-    @Override
-    public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	/**
+	 * Updates the answers of users and redirect the survey to next page
+	 * correctly.
+	 * 
+	 * @param req
+	 *            HTTP Request.
+	 * @param res
+	 *            HTTP Response.
+	 * @throws ServletException
+	 *             and IOException.
+	 */
+	@Override
+	public String serviceMethod(User user, HttpSession session, WiseHttpRequestParameters requestParams) {
+		StringBuilder response = new StringBuilder();
+		/*
+		 * get all the fields values from the form and save them in the hash
+		 * table
+		 */
 
-        /* prepare to write */
-        PrintWriter out;
-        res.setContentType("text/html");
-        out = res.getWriter();
+		String path = requestParams.getContextPath();
+		Map<String, Object> params = requestParams.getFormParameters();
+		String action = requestParams.getAction();
+		if (Strings.isNullOrEmpty(action)) {
+			/* if no action value is specified, fill in default */
+			action = "NEXT";
+		}
 
-        HttpSession session = req.getSession(true);
-        // Surveyor_Application s = (Surveyor_Application) session
-        // .getAttribute("SurveyorInst");
-        if (session.isNew()) {
-            res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "/error"
-                    + WiseConstants.HTML_EXTENSION);
-            return;
-        }
+		/* User jumping to page selected from progress bar */
+		switch (action.toLowerCase()){
+		case "linkpage":
+		{/*
+		 * the next page will be the page clicked by the user or the
+		 * interviewer
+		 */
+			user.readAndAdvancePage(params, false);
+			String linkPageId = requestParams.getNextPage();
+			user.setPage(linkPageId);
+			String newPage = "view_form?p=" + user.getCurrentPage().getId();
+			response.append("<html>");
+			response.append("<head></head>");
+			response.append("<body ONLOAD=\"self.location = '" + newPage + "';\"></body>");
+			response.append("</html>");
+		}
+		break;
+		case "interrupt":
+		{
+			/* Detect interrupt states; forward to appropos page */
+			user.readAndAdvancePage(params, false);
+			user.setInterrupt();
+			session.invalidate();
+			String newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "interrupt" + WiseConstants.HTML_EXTENSION;
+			response.append(this.pageReplaceHtml(newPage));
+		}
+		break;
+		case "timeout":
+		{
+			/* if it is an timeout event, then show the timeout info */
+			user.readAndAdvancePage(params, false);
+			user.setInterrupt();
+			session.invalidate();
+			String newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "timeout" + WiseConstants.HTML_EXTENSION;
+			response.append(this.pageReplaceHtml(newPage));
 
-        /* get the user from session */
-        User theUser = (User) session.getAttribute("USER");
-        if (theUser == null) {
-            out.println("<p>Error: Can't find the user info.</p>");
-            return;
-        }
+		}
+		break;
+		case "abort":
+		{
+			/*
+			 * if it is an abort event (entire window was closed), then record
+			 * event; nothing to show
+			 */
+			user.readAndAdvancePage(params, false);
+			user.setInterrupt();
 
-        /*
-         * get all the fields values from the form and save them in the hash
-         * table
-         */
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        String n, v;
-        Enumeration e = req.getParameterNames();
+			/*
+			 * should force user object to be dropped & connections to be
+			 * cleaned up
+			 */
+			session.invalidate();
+		}
+		break;
+		default:
+		{
+			/*
+			 * either done or continuing; go ahead and advance page give user
+			 * submitted http params to record & process
+			 */
+			user.readAndAdvancePage(params, true);
+		}
+		}
 
-        /* To check the sanity of the inputs */
-        ArrayList<String> inputs = new ArrayList<String>();
+		String newPage="";
+		if (user.completedSurvey()) {
 
-        while (e.hasMoreElements()) {
-            n = (String) e.nextElement();
-            v = req.getParameter(n);
-            inputs.add(v);
-            params.put(n, v);
-        }
-        String path = req.getContextPath();
-        if (SanityCheck.sanityCheck(inputs)) {
-            res.sendRedirect(path + "/admin/error_pages/sanity_error.html");
-            return;
-        }
+			/* check if it is an interview process */
+			Interviewer inv = (Interviewer) session.getAttribute("INTERVIEWER");
+			if (inv != null) {
 
-        String action = req.getParameter("action");
-        if ((action == null) || (action.equals(""))) {
+				/* record interview info in the database */
+				inv.setDone();
 
-            /* if no action value is specified, fill in default */
-            action = "NEXT";
-        }
+				/* remove the current user info */
+				session.removeAttribute("USER");
 
-        String newPage = "";
+				/* redirect to the show overview page */
+				newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "interview/Show_Assignment.jsp";
+			} else {
 
-        /* User jumping to page selected from progress bar */
-        if (action.equalsIgnoreCase("linkpage")) {
+				/*
+				 * redirect the user to the forwarding URL specified in survey
+				 * xml file
+				 */
+				if ((user.getCurrentSurvey().getForwardUrl() != null)
+						&& !user.getCurrentSurvey().getForwardUrl().equalsIgnoreCase("")) {
 
-            /*
-             * the next page will be the page clicked by the user or the
-             * interviewer
-             */
-            theUser.readAndAdvancePage(params, false);
-            String linkPageId = req.getParameter("nextPage");
-            theUser.setPage(linkPageId);
-            newPage = "view_form?p=" + theUser.getCurrentPage().getId();
-            out.println("<html>");
-            out.println("<head></head>");
-            out.println("<body ONLOAD=\"self.location = '" + newPage + "';\"></body>");
-            out.println("</html>");
-        } else if (action.equalsIgnoreCase("INTERRUPT")) {
+					// for example:
+					// forward_url="http://localhost:8080/ca/servlet/begin?t="
+					newPage = user.getCurrentSurvey().getForwardUrl();
+					// if the EDU ID (study space ID) is specified in survey
+					// xml,
+					// then add it to the URL
+					if ((user.getCurrentSurvey().getEduModule() != null)
+							&& !user.getCurrentSurvey().getEduModule().equalsIgnoreCase("")) {
+						// new_page = new_page +
+						// "/"+user.getCurrentSurvey().study_space.dir_name+"/servlet/begin?t="
 
-            /* Detect interrupt states; forward to appropos page */
-            theUser.readAndAdvancePage(params, false);
-            theUser.setInterrupt();
-            session.invalidate();
-            newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "interrupt" + WiseConstants.HTML_EXTENSION;
-            out.println(this.pageReplaceHtml(newPage));
-            return;
-        } else if (action.equalsIgnoreCase("TIMEOUT")) {
+						newPage = newPage + "/" + user.getCurrentSurvey().getStudySpace().dirName + "/survey?t="
+								+ WISEApplication.encode(user.getCurrentSurvey().getEduModule()) + "&r="
+								+ WISEApplication.encode(user.getId());
 
-            /* if it is an timeout event, then show the timeout info */
-            theUser.readAndAdvancePage(params, false);
-            theUser.setInterrupt();
-            session.invalidate();
-            newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "timeout" + WiseConstants.HTML_EXTENSION;
-            out.println(this.pageReplaceHtml(newPage));
-            return;
-        } else if (action.equalsIgnoreCase("ABORT")) {
+					} else {
+						/* otherwise the link will be the URL plus the user ID */
+						newPage = newPage + "?s=" + WISEApplication.encode(user.getId()) + "&si="
+								+ user.getCurrentSurvey().getId() + "&ss="
+								+ WISEApplication.encode(user.getCurrentSurvey().getStudySpace().id);
+						LOGGER.info(newPage + ReadFormServlet.class.getName());
+					}
+				} else {
 
-            /*
-             * if it is an abort event (entire window was closed), then record
-             * event; nothing to show
-             */
-            theUser.readAndAdvancePage(params, false);
-            theUser.setInterrupt();
+					/* Setting the User state to completed. */
+					user.setComplete();
 
-            /*
-             * should force user object to be dropped & connections to be
-             * cleaned up
-             */
-            session.invalidate();
-            return;
-        } else {
+					// -1 is default if no results are going to be reviewed.
+					if (user.getCurrentSurvey().getMinCompleters() == -1) {
+						newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "thank_you";
+					} else {
+						/*
+						 * go to results review, send the view result email only
+						 * once when it reaches the min number of completers
+						 */
+						int currentNumbCompleters = user.checkCompletionNumber();
+						String review = "false";
 
-            /*
-             * either done or continuing; go ahead and advance page give user
-             * submitted http params to record & process
-             */
-            theUser.readAndAdvancePage(params, true);
-        }
+						if (currentNumbCompleters >= user.getCurrentSurvey().getMinCompleters()) {
+							review = "view_results";
+						}
 
-        if (theUser.completedSurvey()) {
+						/*
+						 * redirect to the thank you html with the review link
+						 * for the current user and future completers
+						 */
+						newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "/thank_you?review=" + review;
+					}
+				}
 
-            /* check if it is an interview process */
-            Interviewer inv = (Interviewer) session.getAttribute("INTERVIEWER");
-            if (inv != null) {
+			} // end of else (not interview)
+			response.append(this.pageReplaceHtml(newPage));
+		} else {
 
-                /* record interview info in the database */
-                inv.setDone();
+			/*
+			 * continue to the next page form the link to the next page
+			 */
+			newPage = "view_form?p=" + user.getCurrentPage().getId();
 
-                /* remove the current user info */
-                session.removeAttribute("USER");
+			response.append("<html>");
+			response.append("<head></head>");
+			response.append("<body ONLOAD=\"self.location = '" + newPage + "';\"></body>");
+			response.append("</html>");
+		}
+		return response.toString();
+	}
 
-                /* redirect to the show overview page */
-                newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "interview/Show_Assignment.jsp";
-            } else {
-
-                /*
-                 * redirect the user to the forwarding URL specified in survey
-                 * xml file
-                 */
-                if ((theUser.getCurrentSurvey().getForwardUrl() != null)
-                        && !theUser.getCurrentSurvey().getForwardUrl().equalsIgnoreCase("")) {
-
-                    // for example:
-                    // forward_url="http://localhost:8080/ca/servlet/begin?t="
-                    newPage = theUser.getCurrentSurvey().getForwardUrl();
-                    // if the EDU ID (study space ID) is specified in survey
-                    // xml,
-                    // then add it to the URL
-                    if ((theUser.getCurrentSurvey().getEduModule() != null)
-                            && !theUser.getCurrentSurvey().getEduModule().equalsIgnoreCase("")) {
-                        // new_page = new_page +
-                        // "/"+theUser.getCurrentSurvey().study_space.dir_name+"/servlet/begin?t="
-
-                        newPage = newPage + "/" + theUser.getCurrentSurvey().getStudySpace().dirName + "/survey?t="
-                                + WISEApplication.encode(theUser.getCurrentSurvey().getEduModule()) + "&r="
-                                + WISEApplication.encode(theUser.getId());
-
-                    } else {
-                        /* otherwise the link will be the URL plus the user ID */
-                        newPage = newPage + "?s=" + WISEApplication.encode(theUser.getId()) + "&si="
-                                + theUser.getCurrentSurvey().getId() + "&ss="
-                                + WISEApplication.encode(theUser.getCurrentSurvey().getStudySpace().id);
-                        LOGGER.info(newPage + ReadFormServlet.class.getName());
-                    }
-                } else {
-
-                    /* Setting the User state to completed. */
-                    theUser.setComplete();
-
-                    // -1 is default if no results are going to be reviewed.
-                    if (theUser.getCurrentSurvey().getMinCompleters() == -1) {
-                        newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "thank_you";
-                    } else {
-                        /*
-                         * go to results review, send the view result email only
-                         * once when it reaches the min number of completers
-                         */
-                        int currentNumbCompleters = theUser.checkCompletionNumber();
-                        String review = "false";
-
-                        if (currentNumbCompleters >= theUser.getCurrentSurvey().getMinCompleters()) {
-                            review = "view_results";
-                        }
-
-                        /*
-                         * redirect to the thank you html with the review link
-                         * for the current user and future completers
-                         */
-                        newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "/thank_you?review=" + review;
-                    }
-                }
-
-            } // end of else (not interview)
-            out.println(this.pageReplaceHtml(newPage));
-        } else {
-
-            /*
-             * continue to the next page form the link to the next page
-             */
-            newPage = "view_form?p=" + theUser.getCurrentPage().getId();
-
-            out.println("<html>");
-            out.println("<head></head>");
-            out.println("<body ONLOAD=\"self.location = '" + newPage + "';\"></body>");
-            out.println("</html>");
-        }
-        out.close();
-    }
+	@Override
+	public Logger getLogger() {
+		return LOGGER;
+	}
 }

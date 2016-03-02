@@ -207,7 +207,7 @@ public class User implements UserAnswers {
 	 * @param advance
 	 *            Should the survey be advanced to next page or not.
 	 */
-	public void readAndAdvancePage(HashMap<String, Object> params, boolean advance) {
+	public void readAndAdvancePage(Map<String, Object> params, boolean advance) {
 		String[] pageMainFields = this.currentPage.getFieldList();
 		char[] pageMainFieldTypes = this.currentPage.getValueTypeList();
 		String[] pageMainVals = new String[pageMainFields.length];

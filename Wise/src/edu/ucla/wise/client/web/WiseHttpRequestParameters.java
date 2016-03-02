@@ -26,11 +26,16 @@
  */
 package edu.ucla.wise.client.web;
 
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import edu.ucla.wise.admin.AdminUserSession;
 import edu.ucla.wise.commons.SanityCheck;
+import edu.ucla.wise.persistence.data.Answer;
 import edu.ucla.wise.utils.HttpUtils;
 
 /**
@@ -78,7 +83,50 @@ public class WiseHttpRequestParameters {
 	public String getEncodedSurveyId() {
 		return this.getAlphaNumericParameterValue("s");
 	}
+	
+	public String getRepeatTableName(){
+		return request.getParameter("repeat_table_name");
+	}
 
+	public String getRepeatTableRow(){
+		return request.getParameter("repeat_table_row");
+	}
+
+	public String getRepeatTableRowName(){
+		return request.getParameter("repeat_table_row_name");
+	}
+	
+	public Map<String,Answer> getQuestionAnswersForRepeatSet(){
+		HashMap<String, Answer> params = new HashMap<>();
+		String name, value;
+        Enumeration e = request.getParameterNames();
+        while (e.hasMoreElements()) {
+            name = (String) e.nextElement();
+            value = request.getParameter(name);
+            if (!name.contains("repeat_table_name") && !name.contains("repeat_table_row")
+                    && !name.contains("repeat_table_row_name")) {
+
+                /*
+                 * Parse out the proper name here here split the value into
+                 * its constituents
+                 */
+
+                String[] typeAndValue = value.split(":::");
+                if (typeAndValue.length == 2) {
+                    params.put(name, Answer.getAnswer(typeAndValue[1], typeAndValue[0]));
+                } else {
+                    if (typeAndValue.length == 1) {
+                        params.put(name, Answer.getAnswer("", typeAndValue[0]));
+                    }
+
+                }
+            } else {
+                ;// do nothing
+            }
+        }
+        return params;
+	}
+	
 	public AdminUserSession getAdminUserSessionFromHttpSession() {
 		return (AdminUserSession) this.getSession(true).getAttribute("ADMIN_USER_SESSION");
 	}
@@ -106,5 +154,45 @@ public class WiseHttpRequestParameters {
 	public CharSequence appendEmailUrlParameters(String url){
 		String[][] params = {{"msg",getEncodedMessageId()},{"t",getEncodedStudySpaceId()}};
 		return HttpUtils.createURL(url,params);
+	}
+	
+	public String getAction(){
+		return getAlphaNumericParameterValue("action");
+	}
+	public String getNextPage(){
+	return this.getAlphaNumericParameterValue("nextPage");
+	}
+	
+	public Map<String, Object> getFormParameters(){
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		String n, v;
+		Enumeration e = request.getParameterNames();
+
+		while (e.hasMoreElements()) {
+			n = (String) e.nextElement();
+			v = request.getParameter(n);
+			params.put(n, v);
+		}
+		return params;
+	}
+	
+	public String getContextPath(){
+		return request.getContextPath();
+	}
+	
+	public String getRequestType(){
+		return getAlphaNumericParameterValue("request_type");
+	}
+
+	public String getTableName(){
+		return getAlphaNumericParameterValue("table_name");
+	}
+
+	public String getInstanceName(){
+		return getAlphaNumericParameterValue("instance_name");
+	}
+
+	public String getInviteeId(){
+		return getAlphaNumericParameterValue("invitee_id");
 	}
 }
