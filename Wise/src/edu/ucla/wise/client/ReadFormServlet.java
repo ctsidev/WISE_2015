@@ -84,7 +84,6 @@ public class ReadFormServlet extends AbstractUserSessionServlet {
 		 * table
 		 */
 
-		String path = requestParams.getContextPath();
 		Map<String, Object> params = requestParams.getFormParameters();
 		String action = requestParams.getAction();
 		if (Strings.isNullOrEmpty(action)) {

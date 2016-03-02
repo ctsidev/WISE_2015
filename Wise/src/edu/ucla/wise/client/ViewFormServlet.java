@@ -27,27 +27,26 @@
 package edu.ucla.wise.client;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.Interviewer;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
-import edu.ucla.wise.commons.WiseConstants;
 
 /**
  * ViewFormServlet displays a single survey page as a form to be filled out.
  * 
  */
 @WebServlet("/survey/view_form")
-public class ViewFormServlet extends HttpServlet {
+public class ViewFormServlet extends AbstractUserSessionServlet {
+	private static final Logger LOGGER = Logger.getLogger(ViewFormServlet.class);
     static final long serialVersionUID = 1000;
 
     /**
@@ -62,44 +61,25 @@ public class ViewFormServlet extends HttpServlet {
      *             and IOException.
      */
     @Override
-    public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-
-        /* prepare for writing */
-        PrintWriter out;
-        res.setContentType("text/html");
-        out = res.getWriter();
-
-        HttpSession session = req.getSession(true);
-
-        // Surveyor_Application s =
-        // (Surveyor_Application)session.getAttribute("SurveyorInst");
-
-        /* if session is new, then show the session expired info */
-        if (session.isNew()) {
-            res.sendRedirect(SurveyorApplication.getInstance().getSharedFileUrl() + "error"
-                    + WiseConstants.HTML_EXTENSION);
-            return;
-        }
-
-        /* get the user from session */
-        User theUser = (User) session.getAttribute("USER");
-        if (theUser == null) {
-            out.println("<p>Error: Can't find the user info.</p>");
-            return;
-        }
-
-        /* check if it is an interview process */
+    public String serviceMethod(User user, HttpSession session, WiseHttpRequestParameters requestParams) {
+       StringBuilder response = new StringBuilder();
+    	/* check if it is an interview process */
         Interviewer inv = (Interviewer) session.getAttribute("INTERVIEWER");
         if (inv != null) {
 
             /* get the current page */
-            String pageid = req.getParameter("p");
+            String pageid = requestParams.getPage();
 
             /* set the current page */
-            theUser.setCurrentPage(theUser.getCurrentSurvey().getPage(pageid));
+            user.setCurrentPage(user.getCurrentSurvey().getPage(pageid));
         }
-        out.println(SetupSurveyServlet.getHtml(theUser.getId(), this.getPageHTML(theUser),
-                this.getProgressDivContent(theUser, session)));
+        try {
+			response.append(SetupSurveyServlet.getHtml(user.getId(), this.getPageHTML(user),
+			        this.getProgressDivContent(user, session)));
+		} catch (IOException e) {
+			LOGGER.error("Couldn't generate html page",e);
+		}
+        return response.toString();
     }
 
     /**
@@ -186,4 +166,9 @@ public class ViewFormServlet extends HttpServlet {
         }
         return pageHtml.toString();
     }
+
+	@Override
+	public Logger getLogger() {
+		return LOGGER;
+	}
 }

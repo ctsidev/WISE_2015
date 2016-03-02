@@ -70,6 +70,10 @@ public class WiseHttpRequestParameters {
 		return this.getAlphaNumericParameterValue("t");
 	}
 
+	public String getPage() {
+		return this.getAlphaNumericParameterValue("p");
+	}
+	
 	public String getEncodedMessageId() {
 		return this.getAlphaNumericParameterValue("msg");
 	}
