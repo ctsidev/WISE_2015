@@ -26,13 +26,12 @@
  */
 package edu.ucla.wise.client;
 
-import java.util.Map;
-
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
 import edu.ucla.wise.commons.WiseConstants;
@@ -52,17 +51,10 @@ public class ConsentDeclineServlet extends AbstractUserSessionServlet{
 	}
 
 	@Override
-	public String serviceMethod(User user, HttpSession session, Map<String,String[]> reqParams) {
+	public String serviceMethod(User user, HttpSession session, WiseHttpRequestParameters reqParams) {
 		StringBuilder res = new StringBuilder();
-		/* get the user from session */
-        User theUser = (User) session.getAttribute("USER");
-        if (theUser == null) {
-            res.append("<p>Error: Can't find the user info.</p>");
-            return res.toString();
-        }
-
         /* save the decline comments */
-        theUser.setDeclineReason(reqParams.get("reason")[0]);
+        user.setDeclineReason(reqParams.getReason());
 
         /* then show the thank you page to user */
         String newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "decline_thanks"

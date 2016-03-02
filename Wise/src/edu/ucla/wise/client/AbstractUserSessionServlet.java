@@ -50,6 +50,8 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
 
 	@Override
 	public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		WiseHttpRequestParameters wiseHttpRequestParameters = new WiseHttpRequestParameters(req);
+		
 		/* prepare for writing */
 		PrintWriter out;
 		res.setContentType("text/html");
@@ -60,7 +62,7 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
 		User theUser = null;
 		if (session.isNew()) {
 			getLogger().debug("Could not fetch a stored session for url "+req.getRequestURL());
-			theUser=WebUserUtils.getUserFromUrlParams(new WiseHttpRequestParameters(req));
+			theUser=WebUserUtils.getUserFromUrlParams(wiseHttpRequestParameters);
 			session.setAttribute("USER", theUser);
 		}else{
 			theUser = (User) session.getAttribute("USER");	
@@ -80,16 +82,11 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
 			return;
 		}
 
-		Map<String,String[]> requestParams = new HashMap<String,String[]>(req.getParameterMap());
-		String userAgent = (req.getHeader("user-agent")!=null)?req.getHeader("user-agent"):"NotAvailable";
-		String ipAddress = req.getRemoteAddr()!=null?req.getRemoteAddr():"NotAvailable";
-		requestParams.put("USER-AGENT", new String[]{userAgent});
-		requestParams.put("IP-ADDRESS", new String[]{ipAddress});
-		out.println(this.serviceMethod(theUser, session, requestParams));
+		out.println(this.serviceMethod(theUser, session, wiseHttpRequestParameters));
 	}
 
 	public abstract Logger getLogger();
 
-	public abstract String serviceMethod(User user, HttpSession session, Map<String,String[]> requestParams);
+	public abstract String serviceMethod(User user, HttpSession session, WiseHttpRequestParameters requestParams);
 
 }

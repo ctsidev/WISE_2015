@@ -26,8 +26,6 @@
  */
 package edu.ucla.wise.client;
 
-import java.util.Map;
-
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpSession;
 
@@ -35,6 +33,7 @@ import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
 
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.Survey;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
@@ -64,7 +63,7 @@ public class TriageServlet extends AbstractUserSessionServlet {
     }
 
     @Override
-    public String serviceMethod(User user, HttpSession session, Map<String,String[]> reqParams) {
+    public String serviceMethod(User user, HttpSession session, WiseHttpRequestParameters wiseHttpRequestParams) {
     	LOGGER.debug("Triage servlet for user id:"+user.getId());
         StringBuilder response = new StringBuilder();
 
@@ -140,10 +139,10 @@ public class TriageServlet extends AbstractUserSessionServlet {
             }
         } else if (user.startedSurvey()) {
         	LOGGER.info("User has started the survey in the past, proceeding to the page the user was on");
-            mainUrl = SurveyorApplication.getInstance().getServletUrl() + "setup_survey";
+            mainUrl = ""+wiseHttpRequestParams.appendEmailUrlParameters(SurveyorApplication.getInstance().getServletUrl() + "setup_survey");
         } else {
         	LOGGER.info("Taking the user to the welcome screen");
-            mainUrl = SurveyorApplication.getInstance().getServletUrl() + "welcome";
+            mainUrl = ""+wiseHttpRequestParams.appendEmailUrlParameters(SurveyorApplication.getInstance().getServletUrl() + "welcome");
         }
 
         LOGGER.info("User: '" + user.getId() + "' will be forwarded to " + mainUrl);

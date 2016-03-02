@@ -26,7 +26,6 @@
  */
 package edu.ucla.wise.client;
 
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -34,6 +33,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.ConsentForm;
 import edu.ucla.wise.commons.IRBSet;
 import edu.ucla.wise.commons.Preface;
@@ -67,7 +67,7 @@ public class WelcomeGenerateServlet extends AbstractUserSessionServlet {
 	 *             and IOException.
 	 */
 	@Override
-	public String serviceMethod(User user, HttpSession session, Map<String, String[]> requestParams) {
+	public String serviceMethod(User user, HttpSession session, WiseHttpRequestParameters requestParams) {
 		StringBuilder res = new StringBuilder();
 		/* get the user from session */
 		StudySpace study_space = (StudySpace) session.getAttribute("STUDYSPACE");

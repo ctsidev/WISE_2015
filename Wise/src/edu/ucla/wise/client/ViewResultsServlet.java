@@ -26,24 +26,16 @@
  */
 package edu.ucla.wise.client;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.Page;
 import edu.ucla.wise.commons.Survey;
-import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
-import edu.ucla.wise.commons.WiseConstants;
 
 /**
  * ViewResultsServlet class is used to view the survey results (with the summary
@@ -79,11 +71,11 @@ public class ViewResultsServlet extends AbstractUserSessionServlet {
 	}
 
 	@Override
-	public String serviceMethod(User user, HttpSession session, Map<String, String[]> requestParams) {
+	public String serviceMethod(User user, HttpSession session,WiseHttpRequestParameters requestParams) {
 
 
 		/* get the current page info */
-		String pageId = requestParams.get("page")[0];
+		String pageId = requestParams.getPageId();
 		Survey currentSurvey = user.getCurrentSurvey();
 		/* if no page info, set the 1st page as the current page */
 		if ((pageId == null) || pageId.equalsIgnoreCase("")) {

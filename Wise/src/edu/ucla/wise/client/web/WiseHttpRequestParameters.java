@@ -31,52 +31,80 @@ import javax.servlet.http.HttpSession;
 
 import edu.ucla.wise.admin.AdminUserSession;
 import edu.ucla.wise.commons.SanityCheck;
+import edu.ucla.wise.utils.HttpUtils;
 
 /**
  * Use this class to get parameters from HTTP requests.
  */
 public class WiseHttpRequestParameters {
 
-    /**
-     * HttpRequest to be wrapped by this method.
-     */
-    private final HttpServletRequest request;
+	/**
+	 * HttpRequest to be wrapped by this method.
+	 */
+	private final HttpServletRequest request;
 
-    /**
-     * Constructor to create a wrapper around request.
-     * 
-     * @param request
-     */
-    public WiseHttpRequestParameters(HttpServletRequest request) {
-        this.request = request;
-    }
+	/**
+	 * Constructor to create a wrapper around request.
+	 * 
+	 * @param request
+	 */
+	public WiseHttpRequestParameters(HttpServletRequest request) {
+		this.request = request;
+	}
 
-    public String getAlphaNumericParameterValue(String parameter) {
-        String value = SanityCheck.onlyAlphaNumeric(this.request.getParameter(parameter));
-        return value;
-    }
+	public String getAlphaNumericParameterValue(String parameter) {
+		String value = SanityCheck.onlyAlphaNumeric(this.request.getParameter(parameter));
+		return value;
+	}
 
-    public String getNonSanitizedStringParameter(String parameter) {
-        return this.request.getParameter(parameter);
-    }
+	public String getNonSanitizedStringParameter(String parameter) {
+		return this.request.getParameter(parameter);
+	}
 
-    public String getEncodedStudySpaceId() {
-        return this.getAlphaNumericParameterValue("t");
-    }
+	public String getEncodedStudySpaceId() {
+		return this.getAlphaNumericParameterValue("t");
+	}
 
-    public String getEncodedMessageId() {
-        return this.getAlphaNumericParameterValue("msg");
-    }
+	public String getEncodedMessageId() {
+		return this.getAlphaNumericParameterValue("msg");
+	}
 
-    public String getEncodedSurveyId() {
-        return this.getAlphaNumericParameterValue("s");
-    }
+	public String getPageId() {
+		return this.getAlphaNumericParameterValue("page");
+	}
+	public String getReason() {
+		return this.getAlphaNumericParameterValue("reason");
+	}
+	public String getEncodedSurveyId() {
+		return this.getAlphaNumericParameterValue("s");
+	}
 
-    public AdminUserSession getAdminUserSessionFromHttpSession() {
-        return (AdminUserSession) this.getSession(true).getAttribute("ADMIN_USER_SESSION");
-    }
+	public AdminUserSession getAdminUserSessionFromHttpSession() {
+		return (AdminUserSession) this.getSession(true).getAttribute("ADMIN_USER_SESSION");
+	}
 
-    public HttpSession getSession(boolean createNew) {
-        return this.request.getSession(createNew);
-    }
+	public String getRequestIP(){
+		String IP=request.getRemoteAddr();
+		if(IP==null){
+			IP="";
+		}
+		return IP;
+	}
+
+	public String getUserAgent(){
+		String userAgent = request.getHeader("user-agent");
+		if(userAgent==null){
+			userAgent = "";
+		}
+		return userAgent;
+	}
+
+	public HttpSession getSession(boolean createNew) {
+		return this.request.getSession(createNew);
+	}
+	
+	public CharSequence appendEmailUrlParameters(String url){
+		String[][] params = {{"msg",getEncodedMessageId()},{"t",getEncodedStudySpaceId()}};
+		return HttpUtils.createURL(url,params);
+	}
 }

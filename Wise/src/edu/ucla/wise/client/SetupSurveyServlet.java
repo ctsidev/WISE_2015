@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import edu.ucla.wise.client.web.TemplateUtils;
+import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.Interviewer;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
@@ -165,16 +166,16 @@ public class SetupSurveyServlet extends AbstractUserSessionServlet {
      * 
      */
 	@Override
-	public String serviceMethod(User theUser, HttpSession session, Map<String, String[]> requestParams) {
+	public String serviceMethod(User theUser, HttpSession session, WiseHttpRequestParameters requestParams) {
 		StringBuilder res = new StringBuilder();
         /* get the interviewer if it exists (set by interview_login) */
         Interviewer inv = (Interviewer) session.getAttribute("INTERVIEWER");
 
         /* Initialize survey session, passing the browser information */
-        String browserInfo = requestParams.get("USER-AGENT")[0];
+        String browserInfo = requestParams.getUserAgent();
 
         /* Add Ip address for Audit logs. */
-        String ipAddress = requestParams.get("IP-ADDRESS")[0];
+        String ipAddress = requestParams.getRequestIP();
         theUser.startSurveySession(browserInfo, ipAddress);
 
         /* check if it is an interview process */
