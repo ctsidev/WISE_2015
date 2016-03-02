@@ -38,6 +38,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import edu.ucla.wise.client.web.UrlGenerator;
+import edu.ucla.wise.client.web.WebUserUtils;
 import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
@@ -70,14 +72,7 @@ public abstract class AbstractUserSessionServlet extends HttpServlet {
 
 		/* if the user can't be created, send error info */
 		if (theUser == null) {
-			out.println("<HTML><HEAD><TITLE>Begin Page</TITLE>"
-					+ "<LINK href='"
-					+ SurveyorApplication.getInstance().getSharedFileUrl()
-					+ "style.css' type=text/css rel=stylesheet>"
-					+ "<body><center><table>"
-					// + "<body text=#000000 bgColor=#ffffcc><center><table>"
-					+ "<tr><td>Error: WISE can't seem to store your identity in the browser. You may have disabled cookies.</td></tr>"
-					+ "</table></center></body></html>");
+			out.println(UrlGenerator.getSurveyCookieErrorPage());
 			this.getLogger().error("WISE BEGIN - Error: Can't get the user from session");
 			return;
 		}

@@ -1,10 +1,9 @@
-package edu.ucla.wise.client;
+package edu.ucla.wise.client.web;
 
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
 
-import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.StudySpace;
 import edu.ucla.wise.commons.StudySpaceMap;
 import edu.ucla.wise.commons.User;

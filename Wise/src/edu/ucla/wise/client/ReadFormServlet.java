@@ -36,12 +36,12 @@ import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
 
+import edu.ucla.wise.client.web.UrlGenerator;
 import edu.ucla.wise.client.web.WiseHttpRequestParameters;
 import edu.ucla.wise.commons.Interviewer;
 import edu.ucla.wise.commons.SurveyorApplication;
 import edu.ucla.wise.commons.User;
 import edu.ucla.wise.commons.WISEApplication;
-import edu.ucla.wise.commons.WiseConstants;
 
 /**
  * ReadFormServlet is used to update the results of the user taking the survey
@@ -101,11 +101,7 @@ public class ReadFormServlet extends AbstractUserSessionServlet {
 			user.readAndAdvancePage(params, false);
 			String linkPageId = requestParams.getNextPage();
 			user.setPage(linkPageId);
-			String newPage = "view_form?p=" + user.getCurrentPage().getId();
-			response.append("<html>");
-			response.append("<head></head>");
-			response.append("<body ONLOAD=\"self.location = '" + newPage + "';\"></body>");
-			response.append("</html>");
+			response.append(UrlGenerator.generateViewPageUrl(user.getCurrentPage().getId(),requestParams));
 		}
 		break;
 		case "interrupt":
@@ -114,8 +110,7 @@ public class ReadFormServlet extends AbstractUserSessionServlet {
 			user.readAndAdvancePage(params, false);
 			user.setInterrupt();
 			session.invalidate();
-			String newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "interrupt" + WiseConstants.HTML_EXTENSION;
-			response.append(this.pageReplaceHtml(newPage));
+			response.append(this.pageReplaceHtml(UrlGenerator.getInterruptUrl()));
 		}
 		break;
 		case "timeout":
@@ -124,8 +119,7 @@ public class ReadFormServlet extends AbstractUserSessionServlet {
 			user.readAndAdvancePage(params, false);
 			user.setInterrupt();
 			session.invalidate();
-			String newPage = SurveyorApplication.getInstance().getSharedFileUrl() + "timeout" + WiseConstants.HTML_EXTENSION;
-			response.append(this.pageReplaceHtml(newPage));
+			response.append(this.pageReplaceHtml(UrlGenerator.getTimeoutUrl()));
 
 		}
 		break;
@@ -236,12 +230,7 @@ public class ReadFormServlet extends AbstractUserSessionServlet {
 			/*
 			 * continue to the next page form the link to the next page
 			 */
-			newPage = "view_form?p=" + user.getCurrentPage().getId();
-
-			response.append("<html>");
-			response.append("<head></head>");
-			response.append("<body ONLOAD=\"self.location = '" + newPage + "';\"></body>");
-			response.append("</html>");
+			response.append(UrlGenerator.generateViewPageUrl(user.getCurrentPage().getId(),requestParams));
 		}
 		return response.toString();
 	}

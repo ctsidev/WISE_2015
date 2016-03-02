@@ -105,14 +105,7 @@ public class AnonymousUserSaverServlet extends HttpServlet {
             inputs.add(parameterValues[0]);
             parametersMap.put(parameterName, parameterValues[0]);
         }
-
-        /* Sanity of input parameters. */
-        if (SanityCheck.sanityCheck(inputs)) {
-            response.sendRedirect(path + "/sanity_error.html");
-            return;
-        }
-
-        if (Strings.isNullOrEmpty(parametersMap.get("lastname"))) {
+        if(Strings.isNullOrEmpty(parametersMap.get("lastname"))) {
             pw.write("<html><body>The 'Last Name' field cannot be left blank</body><html>");
             pw.close();
             return;
