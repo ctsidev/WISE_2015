@@ -1,0 +1,4 @@
+GRANT USAGE ON *.* TO cerp2016_2@localhost IDENTIFIED BY 'xxxxxx';
+GRANT ALL PRIVILEGES ON cerp2016_2.* TO cerp2016_2@localhost;
+
+sudo service tomcat6 restart
