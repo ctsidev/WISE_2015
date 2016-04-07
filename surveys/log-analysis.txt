@@ -13,4 +13,5 @@ find ~/wiselog-backups -iname wise.log*|xargs cat|grep "2016-03-16"|grep "unable
  #users with failed links
  cat catalina.out|grep "servlet failed"|cut -d' ' -f6-|sort|uniq
  
- 
+ #message ids that failed
+ find ~/wiselog-backups/ -iname "wise.log*"|xargs cat|grep -r "WISE Error: Begin servlet failed for message id"|cut -d' ' -f15|sort|uniq
