@@ -8,7 +8,7 @@
 find ~/wiselog-backups -iname wise.log*|xargs cat|grep "2016-03-16"|grep "unable to make"|cut -d' ' -f8|sort|uniq
   
  #find page store errors (happens when users have content that has special characters, or is too long for database table)
- find ~/wiselog-backups/ -iname wise.log*|xargs cat|grep PAGE|grep ERROR|grep 2016-03-12
+ find ~/wiselog-backups/ -iname wise.log*|xargs cat|grep PAGE|grep ERROR|grep -v update_trail|grep 2016-03-12
  
  #users with failed links
  cat catalina.out|grep "servlet failed"|cut -d' ' -f6-|sort|uniq
