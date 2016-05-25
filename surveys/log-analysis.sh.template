@@ -1,0 +1,21 @@
+#! /bin/sh
+
+DATE_RESTRICT="2016-05-2"
+
+echo "Get the users who got errors due to issues in survey_message_use table"
+ grep -r "Can't get user" ~/wiselog-backups|grep "Data_Bank user creation error"|grep $DATE_RESTRICT|cut -d' ' -f14,18|sort|uniq
+
+echo "find the number of users connecting on a given date"
+ find ~/wiselog-backups -iname wise.log*|xargs cat|grep $DATE_RESTRICT|grep "welcome hit"|cut -d' ' -f15|cut -d'=' -f2|sort|uniq|wc -l
+
+echo "list users with connection errors on a given date"
+find ~/wiselog-backups -iname wise.log*|xargs cat|grep $DATE_RESTRICT|grep "unable to make"|cut -d' ' -f8|sort|uniq
+
+echo "find page store errors (happens when users have content that has special characters, or is too long for database table)"
+ find ~/wiselog-backups/ -iname wise.log*|xargs cat|grep PAGE|grep ERROR|grep -v update_trail|grep $DATE_RESTRICT
+
+echo "message ids that failed"
+find ~/wiselog-backups/ -iname "wise.log*"|xargs cat|grep "WISE Error: Begin servlet failed for message id"|grep $DATE_RESTRICT|cut -d' ' -f15|sort|uniq
+
+echo "users with failed links"
+cat ~/logs/catalina.out|grep "servlet failed"|cut -d' ' -f6-|sort|uniq
